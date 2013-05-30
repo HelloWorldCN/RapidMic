@@ -36,16 +36,6 @@ int main (int argc, char **argv)
 
 	int j;
 	
-	//划分任务
-	for (i=0;i<5;i++)
-	{
-		for (j=i+1;j<5;j++)
-		{
-
-			//cout<<(i*(5-1)-i*(i-1)/2+j-i-1)<<" ";
-			//outArray[]
-		}
-	}
 
 	PI = 3.14159265;
 	MINE *mine=new MINE();
