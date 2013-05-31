@@ -7,7 +7,6 @@
 //
 
 #ifdef WIN32
-#pragma comment(lib, "..\\lthread-win\\lib\\x86\\pthreadVC2.lib")
 #include "..\libmine\cppmine.h"
 #else
 #include "../libmine/cppmine.h"
@@ -18,8 +17,7 @@
 #include <iostream>
 
 
-#include <pthread.h>
-#include "stringenc.h"
+
 
 
 
@@ -34,14 +32,11 @@ int main (int argc, char **argv)
 	int i, n,m;
 	//double *x, *y;
 
-	int j;
 	
 
 	PI = 3.14159265;
 	MINE *mine=new MINE();
 	mine->run(argc,argv);
-    mine->exportResult();
-
 
 	/* build the problem */
 	n = 17;

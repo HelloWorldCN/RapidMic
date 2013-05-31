@@ -22,7 +22,7 @@
 #include <time.h>
 #include "core.h"
 #include "mine.h"
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN32)
 #pragma comment(lib, "..\\lthread-win\\lib\\x86\\pthreadVC2.lib")
 
 #endif
@@ -254,11 +254,6 @@ void *batchComputeScoreThread(void *pparam)
 	prob.Gy=pthdparainf->Gy;
 	for (i=0;i<pthdparainf->parisLength;i++)
 	{
-		printf("%d\n",pthdparainf->paris[i].var1);
-        if (pthdparainf->paris[i].var1==876) {
-            PrintArrayd(pthdparainf->inData[pthdparainf->paris[i].var1], prob.n );
-            
-        }
         switch (pthdparainf->styleType) {
             case AllParis:
                 prob.x=pthdparainf->inData[pthdparainf->paris[i].var1];
@@ -344,7 +339,6 @@ void *batchComputeScoreThread(void *pparam)
 		}
 		
 	}
-	
 	free(Qm);
 	free(Qm_s);
 	free(prob.x_x);
@@ -455,10 +449,7 @@ mine_score *mine_compute_score(mine_problem *prob, mine_parameter *param)
 	int i=0, j=0;
 	int *Qm, *Qm_s;
 	double *It;
-    clock_t start, finish;
-    double  duration;
-    
-    start = clock();
+
 	
 	
     
@@ -489,11 +480,6 @@ mine_score *mine_compute_score(mine_problem *prob, mine_parameter *param)
 	free(Qm);
 	free(Qm_s);
 	
-	finish = clock();
-    duration = (double)(finish - start) / CLOCKS_PER_SEC;
-    // printf( "%f seconds\n", duration );
-    //system("pause");
-	//mine_problem_free(prob);
 	return prob->score;
 }
 
@@ -687,7 +673,7 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
 	}
 	if (m>10)
 	{
-		numThreads=15;
+		numThreads=20;
 	}else{
 		numThreads=1;
 	}
@@ -732,7 +718,6 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
 		{
 			if (t<pageSize)
 			{
-                printf("%d\n",t);
 				pVarPairs[t].var1=i;
 				pVarPairs[t].var2=j;
 				t++;
@@ -775,6 +760,7 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
 				pthreadinfos[k].scorem=Gy_max-1;
 				pthreadinfos[k].scorep=p;
 				rc = pthread_create(&threads[k], NULL, batchComputeScoreThread, (void *)&pthreadinfos[k]);
+                //sleep(1);
 				if(0 != rc)
 					exit(-1);
 				
@@ -795,8 +781,6 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
 	pthread_cond_wait(&batch_all_thread_completed, &batch_thread_complete_lock);
 	pthread_mutex_unlock(&batch_thread_complete_lock);
     
-	//pthread_mutex_destroy(&batch_thread_complete_lock);
-	//pthread_cond_destroy(&batch_all_thread_completed);
 	//回收资源
 	
 	free(Gy);
@@ -821,7 +805,7 @@ int mine_allPairs_analysis(mine_parameter *param, double **inData,int m,int n,mi
 	
 }
 
-//返回m1*m2的矩阵
+//
 int mine_twoSetsAnalysis(mine_parameter *param,double **inDataSet,int m,int n,int betweenid,mine_result_score *outArray,int outLen )
 {
     return createBatchComputeThread(param, inDataSet, m, n,betweenid,  outArray,  outLen,TwoSets);
@@ -839,8 +823,6 @@ int mine_onePairs_analysis( mine_parameter *param, double *x,double *y,int n,min
 	prob->x = x;
 	prob->y = y;
 	prob->n = n;
-    PrintArrayd(x, n);
-    PrintArrayd(y, n);
 	if (prob->n>1000)
 	{
 		mine_problem_init(prob,param);

@@ -5,6 +5,36 @@
 #include "../src/stringenc.h"
 #include "../src/arg_parser.h"
 #include <fstream>
+#include <time.h>
+#if defined(WIN32) || defined(_WIN32)
+#   include <windows.h>
+#else
+#   include <sys/time.h>
+#endif
+#if defined(WIN32) || defined(_WIN32)
+int
+	gettimeofday(struct timeval *tp, void *tzp)
+{
+	time_t clock;
+	struct tm tm;
+	SYSTEMTIME wtm;
+	GetLocalTime(&wtm);
+	tm.tm_year     = wtm.wYear - 1900;
+	tm.tm_mon     = wtm.wMonth - 1;
+	tm.tm_mday     = wtm.wDay;
+	tm.tm_hour     = wtm.wHour;
+	tm.tm_min     = wtm.wMinute;
+	tm.tm_sec     = wtm.wSecond;
+	tm. tm_isdst    = -1;
+	clock = mktime(&tm);
+	tp->tv_sec = clock;
+	tp->tv_usec = wtm.wMilliseconds * 1000;
+	return (0);
+}
+#endif
+
+
+
 namespace {
 	const char * const Program_name = "RapidMic";
 	const char * const program_name = "rapidMic";
@@ -77,6 +107,9 @@ namespace {
 
 } // end namespace
 using namespace std;
+
+
+
 
 /*
 MINE constructor.
@@ -268,6 +301,8 @@ int MINE::OnePairsAnalysis( double *x, double *y,int n )
 int MINE::run( int argc, char **argv )
 {
 	if (!parserArgs(argc,argv)) return 0;
+    //read input data file;
+    cout << "begin reading input file;"<<endl;
     switch (m_inputLabel) {
         case 0:
             if(!readCSV(true, true)) return 0;
@@ -281,33 +316,47 @@ int MINE::run( int argc, char **argv )
         default:
             break;
     }
+    cout << "begin calculating......."<<endl;
+    struct  timeval start;
+    struct  timeval end;
+    
+    unsigned  long diff;
+    gettimeofday(&start,NULL);
+   
+   
+    int ret;
 	switch (m_AnalysisStyle) {
 	case AllParis:
-		return AllPairsAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum);
+		ret= AllPairsAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum);
 		break;
 	case TwoSets:
 		if (m_betweenId>0&&m_betweenId<m_inputDataRowNum)
 		{
-			return TwoSetsAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum,m_betweenId);
+			ret= TwoSetsAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum,m_betweenId);
 		}else{ cout<<"input variable <var index> must be in (0, number of variables in file)"<<endl;return 0;}
 		break;
 	case MasterVariable:
 		if (m_masterId>=0&&m_masterId<m_inputDataRowNum)
 		{
-			return MasterAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum,m_masterId);
+			ret= MasterAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum,m_masterId);
 		}else { cout<<"input variable <var index> must be in [0, number of variables in file)"<<endl;return 0;}
 		break;
 	case OneParis:
 		if (m_onepair1<m_inputDataRowNum&&m_onepair1>=0&&m_onepair2>=0&&m_onepair2<m_inputDataRowNum)
 		{
-			return OnePairsAnalysis(m_inputDataMatrix[m_onepair1],m_inputDataMatrix[m_onepair2],m_inputDataColNum);
+			ret= OnePairsAnalysis(m_inputDataMatrix[m_onepair1],m_inputDataMatrix[m_onepair2],m_inputDataColNum);
 		}else { cout<<"input variable <var index> must be in [0, number of variables in file)"<<endl;return 0;}
 	default:
 		return 0;
 		break;
 	}
-	return 1;
-
+    if (ret) {
+        cout << "completed calculation;"<<endl;
+        gettimeofday(&end,NULL);
+        diff = 1000000 * (end.tv_sec-start.tv_sec)+ end.tv_usec-start.tv_usec;
+        cout <<"total calculating time:"<<diff/(1000*1000) <<"(s)"<<endl;
+        return exportResult();
+    }else return 0;
 }
 
 bool MINE::readCSV(bool rowlabel,bool collabel)
@@ -504,6 +553,7 @@ void MINE::printResult(){
 
 bool MINE::exportResult()
 {
+    cout << "begin writing result file;"<<endl;
     if (m_ResultsArrayLen>0) {
         if (m_varRowNames.size()>0&&m_outputLabel==1) {
             ofstream outputfile(m_outputFileName.c_str());
@@ -583,6 +633,7 @@ bool MINE::exportResult()
             
         }
     }else return false;
+    cout << "end all!"<<endl;
     return  true;
     
     
