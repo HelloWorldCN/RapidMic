@@ -6,11 +6,7 @@
 //  Copyright (c) 2013年 tang. All rights reserved.
 //
 
-#ifdef WIN32
-#include "..\libmine\cppmine.h"
-#else
-#include "../libmine/cppmine.h"
-#endif
+#include "cppmine.h"
 #include <stdio.h>
 #include <cstdlib>
 #include <cmath>
