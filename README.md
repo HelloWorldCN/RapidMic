@@ -45,19 +45,19 @@ First download datasets from http://www.exploredata.net/Downloads
 
 1)Ex1: Compute one pair(1 vs. 2) variables
 
-	`RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -p 1,2 -l 0 -L 1`
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -p 1,2 -l 0 -L 1
 
 2)Ex2: Compute all pairs of variables against each other
 
-	`RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -A -l 0 -L 1`
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -A -l 0 -L 1
 
 3)Ex3:Compute the 4th variable vs. all the other
 
-	`RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -m 4 -l 0 -L 1`
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -m 4 -l 0 -L 1
 
 4)Ex4:Compute each of the first 4 variables to each of the rest of the variables
 
-	`RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -b 4 -l 0 -L 1`
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -b 4 -l 0 -L 1
 
 
 
@@ -66,7 +66,8 @@ First download datasets from http://www.exploredata.net/Downloads
 You can use pre compiled binary in sub directory bin,
 Or compile source yourself.
 On Unix ,linux and macos systems, type the following to build in terminal 
-	`g++ main.cpp core.c mine.c cppmine.cpp arg_parser.cc stringenc.cpp -o RapidMic -lpthread`
+
+	g++ main.cpp core.c mine.c cppmine.cpp arg_parser.cc stringenc.cpp -o RapidMic -lpthread
 
 On Windows, you can use VS2010 to build
 
