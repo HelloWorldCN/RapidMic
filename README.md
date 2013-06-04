@@ -67,7 +67,7 @@ You can use pre compiled binary in sub directory bin,
 Or compile source yourself.
 On Unix ,linux and macos systems, type the following to build in terminal 
 
-	g++ main.cpp core.c mine.c cppmine.cpp arg_parser.cc stringenc.cpp -o RapidMic -lpthread
+	g++ main.cpp core.c mine.c cppmine.cpp arg_parser.cc stringenc.cpp -o RapidMic -pthread
 
 On Windows, you can use VS2010 to build
 
