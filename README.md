@@ -27,8 +27,8 @@ RapidMic is available at https://github.com/HelloWorldCN/RapidMic
 	-l <label style>, --inputlabel=<label style>     if input csv file's first line is comlumn name and the first comlumn is row name, then <label style>=0 ,else if just only comlumn name <label style>=1, else if just only row name <label style>=2 ;
 	-a <alpha value>, --alpha=<alpha>     the exponent in B(n) = n^alpha (default: 0.6.) alpha must be in (0, 1.0]
 	-c <clumps value>, --clumps=<c>     determines how many more clumps there will be than columns in every partition. Default value is 15,c must be > 0;
-	-o <file>, --output=<file>     output filename (default: mine_out.csv);
-	-L <label style>, --outputlabel=<label style>     output csv file adopt number index of row as vaiable label ,then <label style>=0£¬else adopt input file's row name, then <label style>=1;
+	-o <file>, --output=<file>     output filename (if not be set, will print result in screen);
+	-L <label style>, --outputlabel=<label style>     output csv file adopt number index of row as vaiable label ,then <label style>=0 ;else adopt input file's row name, then <label style>=1;
 	-A <allPairs>, --allPairs     will cause MINE to compare all pairs of variables against each other; 
 	-b <var index>, --pairsBetween=<var index>     will compare each of the first i variables to each of the rest of the variables. Variables are indexed from 0;input variable <var index> must be in (0, number of variables in file)
 	-m <var index>, --master=<var index>     variable <var index> vs. all <var index> must be in [0, number of variables in file);
@@ -101,3 +101,110 @@ Each line contains one pair's compute result and is ended by a '\n' character.
 	
 
  
+ 
+ 
+ 
+ 
+ 
+ 
+=========
+RapidMicscienceReshef(D. Reshef, Y. Reshef, H. Finucane, S. Grossman, G. McVean, P. Turnbaugh, 
+E. Lander, M. Mitzenmacher, and P. Sabeti.  Detecting novel associations in large datasets. Science, 6062(334):1518¨C1524, 2011.)
+MINEDavide Albaneseminepy
+RapidMicReshefJAVA
+
+RapidMic is available at https://github.com/HelloWorldCN/RapidMic
+
+
+
+#
+=================
+
+* 
+* 
+
+
+#
+============================
+### : 
+`RapidMic -i datasetfile [inputoptions] [outputoptions]`
+
+### :
+	-h, --help     ;
+	-V, --version     ;
+	-i <file>, --input=<file>     csv;
+	-l <label style>, --inputlabel=<label style>     csv0 ,1, 2 ;
+	-a <alpha value>, --alpha=<alpha>     the exponent in B(n) = n^alpha (default: 0.6.) alpha must be in (0, 1.0]
+	-c <clumps value>, --clumps=<c>     determines how many more clumps there will be than columns in every partition. Default value is 15,c must be > 0;
+	-o <file>, --output=<file>     csv (, );
+	-L <label style>, --outputlabel=<label style>    csv100
+	-A <allPairs>, --allPairs     ; 
+	-b <var index>, --pairsBetween=<var index>     iii (0, )
+	-m <var index>, --master=<var index>     [0, );
+	-p <var1 index> <var2 index>,--onePair=<var1 index> <var2 index>     ;	
+
+
+
+If output file is omitted, the compute result will be printed on the screen.
+
+
+
+=======
+ http://www.exploredata.net/Downloads
+
+	0
+
+1)Ex1: (1 vs. 2) 
+
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -p 1,2 -l 0 -L 1
+
+2)Ex2: 
+
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -A -l 0 -L 1
+
+3)Ex3:Compute the 4th variable vs. all the other
+
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -m 4 -l 0 -L 1
+
+4)Ex4:Compute each of the first 4 variables to each of the rest of the variables
+
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -b 4 -l 0 -L 1
+
+
+
+#Installation and Data Format
+============================
+	bin
+	Unix ,linux and macoshi
+
+	g++ main.cpp core.c mine.c cppmine.cpp arg_parser.cc stringenc.cpp -o RapidMic -pthread
+
+WindowsVS 2010VS 2005 2008
+
+### 
+CSV:
+### 
+		name,colname1,colname2,...
+		variable1,1,2,...
+		variable2,3,5,...
+		variable3,6,9,...
+		variable4,...
+		...
+		
+
+
+
+
+### 
+CSV:
+###
+		var1,var2,mic,mev,mcn,mas
+		0,1,0.1,0.2,0.4,0.5
+		....
+	
+###
+		var1,var2,mic,mev,mcn,mas
+		YAL001C,YAL014C,0.1,0.2,0.4,0.5
+		....
+	
+ 	
