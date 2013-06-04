@@ -22,27 +22,16 @@ RapidMic is available at https://github.com/HelloWorldCN/RapidMic
 
 ### options:
 	-h, --help     display this help and exit;
-
 	-V, --version     output version information and exit;
-
 	-i <file>, --input=<file>     input filename;
-
 	-l <label style>, --inputlabel=<label style>     if input csv file's first line is comlumn name and the first comlumn is row name, then <label style>=0 ,else if just only comlumn name <label style>=1, else if just only row name <label style>=2 ;
-
 	-a <alpha value>, --alpha=<alpha>     the exponent in B(n) = n^alpha (default: 0.6.) alpha must be in (0, 1.0]
-
 	-c <clumps value>, --clumps=<c>     determines how many more clumps there will be than columns in every partition. Default value is 15,c must be > 0;
-
 	-o <file>, --output=<file>     output filename (default: mine_out.csv);
-
 	-L <label style>, --outputlabel=<label style>     output csv file adopt number index of row as vaiable label ,then <label style>=0£¬else adopt input file's row name, then <label style>=1;
-
 	-A <allPairs>, --allPairs     will cause MINE to compare all pairs of variables against each other; 
-
 	-b <var index>, --pairsBetween=<var index>     will compare each of the first i variables to each of the rest of the variables. Variables are indexed from 0;input variable <var index> must be in (0, number of variables in file)
-
 	-m <var index>, --master=<var index>     variable <var index> vs. all <var index> must be in [0, number of variables in file);
-
 	-p <var1 index> <var2 index>,--onePair=<var1 index> <var2 index>     variable <var1 index> vs variable <var2 index> <var1 index> and <var2 index> must be in [0, number of variables in file);	
 
 
