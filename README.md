@@ -17,10 +17,10 @@ RapidMic is available at https://github.com/HelloWorldCN/RapidMic
 
 #Quick Start
 ============================
-Usage: 
+### Usage: 
 `RapidMic -i datasetfile [inputoptions] [outputoptions]`
 
-options:
+### options:
 	-h, --help     display this help and exit;
 
 	-V, --version     output version information and exit;
@@ -77,11 +77,11 @@ First download datasets from http://www.exploredata.net/Downloads
 You can use pre compiled binary in sub directory bin,
 Or compile source yourself.
 On Unix ,linux and macos systems, type the following to build in terminal 
-`g++ main.cpp core.c mine.c cppmine.cpp arg_parser.cc stringenc.cpp -o RapidMic -lpthread`
+	`g++ main.cpp core.c mine.c cppmine.cpp arg_parser.cc stringenc.cpp -o RapidMic -lpthread`
 
 On Windows, you can use VS2010 to build
 
-*input file format
+### input file format
 The format of input data file is comma-separated values (CSV) file:
 ### 
 		name,colname1,colname2,...
@@ -90,11 +90,12 @@ The format of input data file is comma-separated values (CSV) file:
 		variable3,6,9,...
 		variable4,...
 		...
+		
 
 Each line contains an variable instance and is ended by a '\n' character. 
 
 
-*output file format
+### output file format
 The format of output data file is comma-separated values (CSV) file:
 ###
 		var1,var2,mic,mev,mcn,mas
