@@ -97,11 +97,121 @@ The format of output data file is comma-separated values (CSV) file:
 		YAL001C,YAL014C,0.1,0.2,0.4,0.5
 		....
 	
+	Each line contains one pair's compute result and is ended by a '\n' character. 	
+	
+
+ 
+ 
+ 
+=======================
+RapidMic是《scicene》上提出的MIC（最大信息系数）的快速并行实现，实现代码参照了Davide Albanese等的minepy。
+在实现过程中对计算过程进行了大量的并行优化，因此软件能够快速的进行大量的数据的分析计算任务，不会像MINE原始作者提供
+的JAVA实现软件一样在稍微大一点的数据集进行所有序列都进行比对崩溃并且速度慢的问题。
+
+RapidMic is available at https://github.com/HelloWorldCN/RapidMic
+
+
+
+#Table of Contents
+=================
+
+* Quick Start
+* Installation and Data Format
+
+
+#Quick Start
+============================
+### 使用方式，在控制台或者是终端中输入命令: 
+`RapidMic -i datasetfile [inputoptions] [outputoptions]`
+
+### 参数:
+	-h, --help     帮助;
+	-V, --version     版本;
+	-i <file>, --input=<file>     输入数据文件;
+	-l <label style>, --inputlabel=<label style>     if input csv file's first line is comlumn name and the first comlumn is row name, then <label style>=0 ,else if just only comlumn name <label style>=1, else if just only row name <label style>=2 ;
+	-a <alpha value>, --alpha=<alpha>     the exponent in B(n) = n^alpha (default: 0.6.) alpha must be in (0, 1.0]
+	-c <clumps value>, --clumps=<c>     determines how many more clumps there will be than columns in every partition. Default value is 15,c must be > 0;
+	-o <file>, --output=<file>     output filename (if not be set, will print result in screen);
+	-L <label style>, --outputlabel=<label style>     output csv file adopt number index of row as vaiable label ,then <label style>=0 ;else adopt input file's row name, then <label style>=1;
+	-A <allPairs>, --allPairs     will cause MINE to compare all pairs of variables against each other; 
+	-b <var index>, --pairsBetween=<var index>     will compare each of the first i variables to each of the rest of the variables. Variables are indexed from 0;input variable <var index> must be in (0, number of variables in file)
+	-m <var index>, --master=<var index>     variable <var index> vs. all <var index> must be in [0, number of variables in file);
+	-p <var1 index> <var2 index>,--onePair=<var1 index> <var2 index>     variable <var1 index> vs variable <var2 index> <var1 index> and <var2 index> must be in [0, number of variables in file);	
+
+
+
+If output file is omitted, the compute result will be printed on the screen.
+
+
+Example
+=======
+First download datasets from http://www.exploredata.net/Downloads
+
+1)Ex1: Compute one pair(1 vs. 2) variables
+
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -p 1,2 -l 0 -L 1
+
+2)Ex2: Compute all pairs of variables against each other
+
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -A -l 0 -L 1
+
+3)Ex3:Compute the 4th variable vs. all the other
+
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -m 4 -l 0 -L 1
+
+4)Ex4:Compute each of the first 4 variables to each of the rest of the variables
+
+	RapidMic -i "Spellman.csv" -o 2.csv -a 0.6 -c 15 -b 4 -l 0 -L 1
+
+
+
+#Installation and Data Format
+============================
+You can use pre compiled binary in sub directory bin,
+Or compile source yourself.
+On Unix ,linux and macos systems, type the following to build in terminal 
+
+	g++ main.cpp core.c mine.c cppmine.cpp arg_parser.cc stringenc.cpp -o RapidMic -pthread
+
+On Windows, you can use VS2010 to build
+
+### input file format
+The format of input data file is comma-separated values (CSV) file:
+### 
+		name,colname1,colname2,...
+		variable1,1,2,...
+		variable2,3,5,...
+		variable3,6,9,...
+		variable4,...
+		...
+		
+
+Each line contains an variable instance and is ended by a '\n' character. 
+
+
+### output file format
+The format of output data file is comma-separated values (CSV) file:
+###
+		var1,var2,mic,mev,mcn,mas
+		0,1,0.1,0.2,0.4,0.5
+		....
+	
+###or
+		var1,var2,mic,mev,mcn,mas
+		YAL001C,YAL014C,0.1,0.2,0.4,0.5
+		....
+	
 Each line contains one pair's compute result and is ended by a '\n' character. 	
 	
 
  
  
+ 
+ 
+ 
+ 
+ 
+
  
  
  
