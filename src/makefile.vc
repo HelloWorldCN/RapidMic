@@ -1,0 +1,25 @@
+objects=core.obj main.obj mine.obj arg_parser.obj cppmine.obj stringenc.obj
+RapidMic.exe:$(objects)
+	link.exe /out:RapidMic.exe $(objects) /LIBPATH:".\lthread-win\lib\x86" pthreadVC2.lib
+core.obj:core.c
+    cl.exe core.c /c 
+main.obj:main.cpp
+    cl.exe main.cpp /c 
+	
+mine.obj:mine.c
+    cl.exe mine.c /c /I".\lthread-win\include"
+	
+arg_parser.obj:arg_parser.cc
+    cl.exe arg_parser.cc /c
+	
+cppmine.obj:cppmine.cpp
+    cl.exe cppmine.cpp /c
+	
+stringenc.obj:stringenc.cpp
+    cl.exe stringenc.cpp /c
+clean:
+    @del $(objects)
+    @echo Project has clean.
+
+	
+	
