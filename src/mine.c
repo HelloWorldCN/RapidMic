@@ -192,6 +192,9 @@ void FixOnePartition(mine_problem *prob,double c,int firstpartition,int indexp,d
 }
 
 
+/*This function is the work thread definition and implementation for finding the highest mutual information attainable
+ with multi different partion grids on variable sequence x and y*/
+//pparam contains multi different partion grids 
 void *PartitionThread(void *pparam)
 {
 	int i=0,j=0;
@@ -242,7 +245,9 @@ void *PartitionThread(void *pparam)
 	pthread_exit(NULL);
 	return NULL;
 }
-mine_score *mine_compute_score_multithread(mine_problem *prob, mine_parameter *param)
+
+//compute one pair variables using multi-threads
+mine_score *mine_compute_score_mt(mine_problem *prob, mine_parameter *param)
 {
 	int i=0, j=0;
 	threadparams *pthreadinfos;
@@ -311,7 +316,9 @@ mine_score *mine_compute_score_multithread(mine_problem *prob, mine_parameter *p
     
 }
 
-
+//
+//This function is the work thread definition and implementation for batch computing multi pairs variables
+//pparam contains multi pais variables informations
 void *batchComputeScoreThread(void *pparam)
 {
 	int i=0, j=0,k=0;
@@ -568,6 +575,8 @@ void mine_free_score(mine_score **score)
 		score_ptr = NULL;
     }
 }
+
+//This function create multi work threads for analyzing input data rely on task type.
 int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int n,int masterOrBetweenVariableid,mine_result_score *outArray,int outLen,ANALYSISSTYLES styleType)
 {
     int i,j,t,k,rc;
@@ -753,7 +762,7 @@ int mine_onePair_analysis( mine_parameter *param, double *x,double *y,int n,mine
 	if (prob->n>=100)
 	{
 		mine_problem_init(prob,param);
-		mine_compute_score_multithread(prob,param);
+		mine_compute_score_mt(prob,param);
 	}else{
 		mine_problem_init(prob,param);
 		mine_compute_score(prob,param);

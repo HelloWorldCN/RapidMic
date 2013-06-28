@@ -109,9 +109,16 @@ extern "C" {
      *  destroys the score structure.
      */
     void mine_free_score(mine_score **score);
+    /*will compare one pair variables x and y*/
     int mine_onePair_analysis(mine_parameter *param, double *x,double *y,int n,mine_result_score *outResult);
+    
+    /*will compare variable i to the rest of the variables*/
     int mine_masterVariableAnalysis(mine_parameter *param,double **inData,int m,int n,int masterid,mine_result_score *outArray,int outLen );
+    
+    /*will compare all pairs of variables against each other*/
     int mine_allPairs_analysis(mine_parameter *param, double **inData,int m,int n,mine_result_score *outArray,int outLen );
+    
+    /*will compare each of the first i variables to each of the rest of the variables*/
 	int mine_twoSetsAnalysis(mine_parameter *param,double **inDataSet,int m,int n,int betweenid,mine_result_score *outArray,int outLen );
 	void get_result_score(mine_score *score,mine_result_score* result);
 #ifdef __cplusplus
