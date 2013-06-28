@@ -1,4 +1,5 @@
 % % Help
+% Note: if your operation system is linux and unix,you may need run compile.m first
 % Input Parameters
 % inputcsvfile     input comma-separated value(CSV) file filename;The filename input is a string enclosed in single quotes;The file can only contain numeric values. 
 % alpha            the exponent in B(n) = n^alpha (default: 0.6.) alpha must be in (0, 1.0];
@@ -148,12 +149,14 @@ else
         otherwise
             disp('Unknown method.')
     end
+    binpath='';
     if isunix
         z='/';
+         binpath=[pwd,z,'RapidMic'];
     else
         z='\';
     end;
-    binpath='';
+    
     if ismac
         binpath=[pwd,z,'RapidMic-macos'];
     end;
