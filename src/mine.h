@@ -1,3 +1,4 @@
+
 #ifndef _LIBMINE_H
 #define _LIBMINE_H
 
@@ -24,7 +25,7 @@ extern "C" {
     {
         int m;
         int *p;
-        double **I;//最小划分为2*2格子，因此I[0][0]就表示2*2的划分，依次如I[1][2]就表示3*4的划分，即x数据划分成4份并且y数据划分成3份
+        double **I;
     } mine_score;
     /* The mine_problem structure describes the problem. */
     /* x and y are the two variables of length n. */
@@ -90,7 +91,7 @@ extern "C" {
     }batchThreadparams;
     
     
-    int mine_onePairs_analysis(mine_parameter *param, double *x,double *y,int n,mine_result_score *outResult);
+    
     /* Computes the maximum normalized mutual information scores
      * and returns a mine_score structure.
      */
@@ -104,26 +105,11 @@ extern "C" {
     char *check_parameter(mine_parameter *param);
     
     
-    /* Returns the Maximal Information Coefficient (MIC). */
-    double mic(mine_score *score);
-    
-    
-    /* Returns the Maximum Asymmetry Score (MAS). */
-    double mas(mine_score *score);
-    
-    
-    /* Returns the Maximum Edge Value (MEV). */
-    double mev(mine_score *score);
-    
-    
-    /* Returns the Minimum Cell Number (MCN). */
-    double mcn(mine_score *score);
-    
-    
     /* This function frees the memory used by a mine_score and 
      *  destroys the score structure.
      */
     void mine_free_score(mine_score **score);
+    int mine_onePair_analysis(mine_parameter *param, double *x,double *y,int n,mine_result_score *outResult);
     int mine_masterVariableAnalysis(mine_parameter *param,double **inData,int m,int n,int masterid,mine_result_score *outArray,int outLen );
     int mine_allPairs_analysis(mine_parameter *param, double **inData,int m,int n,mine_result_score *outArray,int outLen );
 	int mine_twoSetsAnalysis(mine_parameter *param,double **inDataSet,int m,int n,int betweenid,mine_result_score *outArray,int outLen );

@@ -1,3 +1,16 @@
+
+/*
+ Dr. Tang rewrite the core MIC implementation based on Davide Albanese
+ The following code support rapidly computing MIC.
+ We presented a new rapidly computing maximal information-based nonparametric exploration tool for
+ statistical analysis of large-scale dataset.  By parallel processing of MIC algorithm, the algorithm
+ can well analyze large-scale dataset and greatly reduce the coputing time.
+ 下面的代码由西南交通大学 Dr唐 改写
+ 本代码采用多线程的方式快速计算MIC 值
+ 
+ Southwest Jiaotong University
+ 
+ */
 /*
  This code is written by Davide Albanese <davide.albanese@gmail.com>.
  (C) 2012 Davide Albanese, (C) 2012 Fondazione Bruno Kessler.
@@ -22,6 +35,7 @@
 #include <time.h>
 #include "core.h"
 #include "mine.h"
+#include <string.h>
 #if defined(WIN32) || defined(_WIN32)
 #pragma comment(lib, ".\\lthread-win\\lib\\x86\\pthreadVC2.lib")
 #include ".\\lthread-win\\include\\pthread.h"
@@ -30,7 +44,7 @@
 #endif
 #define MAX(a, b) ((a) > (b) ? (a):(b))
 #define MIN(a, b) ((a) < (b) ? (a):(b))
-#define NUM_THREADS     20
+#define MAX_THREADS_NUMS     50
 #define MINE_SUCCESS 1
 #define MINE_FAIL    0
 
@@ -43,6 +57,18 @@ pthread_mutex_t batch_thread_complete_lock= PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t batch_res_lock= PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t batch_all_thread_completed=PTHREAD_COND_INITIALIZER;
 unsigned batch_thread_complete_count=0;
+int num_threads=0;
+
+int getOptimizedThreadNum(int dataNum,int flag){
+    //for single partion
+    if (flag) {
+        //linear fitting
+        return MIN(MAX_THREADS_NUMS, (int)floor(0.002152803091055*dataNum+33.243420573011576));
+    }else{
+        
+    }
+    return 0;
+}
 
 void mine_problem_init(mine_problem *prob, mine_parameter *param)
 {
@@ -106,8 +132,8 @@ void mine_problem_init(mine_problem *prob, mine_parameter *param)
 
 
 //************************************
-// Method:    mine_compute_xy 当x或者是y划分成固定的格数时，求另外一个数据划分成不同的格数时的信息
-// FullName:  mine_compute_xy
+// Method:    FixOnePartition 当x或者是y划分成固定的格数时，求另外一个数据划分成不同的格数时的信息
+// FullName:  FixOnePartition
 // Access:    public
 // Returns:   void
 // Qualifier:
@@ -207,8 +233,8 @@ void *PartitionThread(void *pparam)
 	free(subI);
 	
 	pthread_mutex_lock(&thread_complete_lock);
-	thread_complete_count = thread_complete_count + 1;
-	if (thread_complete_count==NUM_THREADS)
+	thread_complete_count--;
+	if (thread_complete_count==0)
 	{
 		pthread_cond_signal(&all_thread_completed);
 	}
@@ -216,6 +242,76 @@ void *PartitionThread(void *pparam)
 	pthread_exit(NULL);
 	return NULL;
 }
+mine_score *mine_compute_score_multithread(mine_problem *prob, mine_parameter *param)
+{
+	int i=0, j=0;
+	threadparams *pthreadinfos;
+	pthread_t *threads;
+	int pageSize;
+	int t,rc,numThreads;
+    
+	/* x vs. y */
+	for (i=0; i<prob->score->m; i++)
+	{
+		//pre-allocate space
+		prob->score->I[i] = (double *) malloc ((prob->score->p[i]) * sizeof(double));
+		for (j=0;j<prob->score->p[i];j++)
+		{
+			prob->score->I[i][j]=0.0f;
+		}
+	}
+    numThreads=getOptimizedThreadNum(prob->n, 1);
+	pthreadinfos=(threadparams *)malloc(sizeof(threadparams)*numThreads);
+	threads=(pthread_t *)malloc(sizeof(pthread_t )*numThreads);
+	pageSize=(2*prob->score->m)/numThreads;
+    thread_complete_count=numThreads;
+	for(t=0; t<numThreads; t++){
+		pthreadinfos[t].c=param->c;
+		if (t<(numThreads/2-1))
+		{
+			pthreadinfos[t].firstPartition=0;
+			pthreadinfos[t].indexBegin=(t)*pageSize;
+			pthreadinfos[t].indexEnd=(t+1)*pageSize;
+			pthreadinfos[t].prob=prob;
+		}
+		if (t==(numThreads/2-1))
+		{
+			pthreadinfos[t].firstPartition=0;
+			pthreadinfos[t].indexBegin=(t)*pageSize;
+			pthreadinfos[t].indexEnd=prob->score->m;
+			pthreadinfos[t].prob=prob;
+		}
+		if (t>(numThreads/2-1)&&t<(numThreads-1))
+		{
+			pthreadinfos[t].firstPartition=1;
+			pthreadinfos[t].indexBegin=(t-numThreads/2)*pageSize;
+			pthreadinfos[t].indexEnd=(t+1-numThreads/2)*pageSize;
+			pthreadinfos[t].prob=prob;
+		}
+		if (t==(numThreads-1))
+		{
+			pthreadinfos[t].firstPartition=1;
+			pthreadinfos[t].indexBegin=(t-numThreads/2)*pageSize;
+			pthreadinfos[t].indexEnd=prob->score->m;
+			pthreadinfos[t].prob=prob;
+		}
+		rc = pthread_create(&threads[t], NULL, PartitionThread, (void *)&pthreadinfos[t]);
+        
+		if (rc){
+			printf("ERROR; return code from pthread_create() is %d\n", rc);
+			exit(-1);
+		}
+	}
+	pthread_mutex_lock(&thread_complete_lock);
+	pthread_cond_wait(&all_thread_completed, &thread_complete_lock);
+	pthread_mutex_unlock(&thread_complete_lock);
+    
+	//pthread_exit(NULL);
+	return prob->score;
+    
+}
+
+
 void *batchComputeScoreThread(void *pparam)
 {
 	int i=0, j=0,k=0;
@@ -246,7 +342,7 @@ void *batchComputeScoreThread(void *pparam)
 	score.I = (double **) malloc (score.m * sizeof(double *));
 	prob.Gy=pthdparainf->Gy;
 	for (i=0;i<pthdparainf->parisLength;i++)
-	{
+	{		
         switch (pthdparainf->styleType) {
             case AllParis:
                 prob.x=pthdparainf->inData[pthdparainf->paris[i].var1];
@@ -356,72 +452,7 @@ void *batchComputeScoreThread(void *pparam)
 	
 }
 
-mine_score *mine_compute_score_multithread(mine_problem *prob, mine_parameter *param)
-{
-	int i=0, j=0;
-	threadparams *pthreadinfos[NUM_THREADS];
-	pthread_t threads[NUM_THREADS];
-	int pageSize;
-	int t,rc;
-    
-	/* x vs. y */
-	for (i=0; i<prob->score->m; i++)
-	{
-		//pre-allocate space
-		prob->score->I[i] = (double *) malloc ((prob->score->p[i]) * sizeof(double));
-		for (j=0;j<prob->score->p[i];j++)
-		{
-			prob->score->I[i][j]=0.0f;
-		}
-	}
-	//可能需要修改一下
-	pageSize=(2*prob->score->m)/NUM_THREADS;
-	for(t=0; t<NUM_THREADS; t++){
-		pthreadinfos[t]=(threadparams *) malloc (sizeof(threadparams));
-		pthreadinfos[t]->c=param->c;
-		if (t<(NUM_THREADS/2-1))
-		{
-			pthreadinfos[t]->firstPartition=0;
-			pthreadinfos[t]->indexBegin=(t)*pageSize;
-			pthreadinfos[t]->indexEnd=(t+1)*pageSize;
-			pthreadinfos[t]->prob=prob;
-		}
-		if (t==(NUM_THREADS/2-1))
-		{
-			pthreadinfos[t]->firstPartition=0;
-			pthreadinfos[t]->indexBegin=(t)*pageSize;
-			pthreadinfos[t]->indexEnd=prob->score->m;
-			pthreadinfos[t]->prob=prob;
-		}
-		if (t>(NUM_THREADS/2-1)&&t<(NUM_THREADS-1))
-		{
-			pthreadinfos[t]->firstPartition=1;
-			pthreadinfos[t]->indexBegin=(t-NUM_THREADS/2)*pageSize;
-			pthreadinfos[t]->indexEnd=(t+1-NUM_THREADS/2)*pageSize;
-			pthreadinfos[t]->prob=prob;
-		}
-		if (t==(NUM_THREADS-1))
-		{
-			pthreadinfos[t]->firstPartition=1;
-			pthreadinfos[t]->indexBegin=(t-NUM_THREADS/2)*pageSize;
-			pthreadinfos[t]->indexEnd=prob->score->m;
-			pthreadinfos[t]->prob=prob;
-		}
-		rc = pthread_create(&threads[t], NULL, PartitionThread, (void *)pthreadinfos[t]);
-        
-		if (rc){
-			//printf("ERROR; return code from pthread_create() is %d\n", rc);
-			exit(-1);
-		}
-	}
-	pthread_mutex_lock(&thread_complete_lock);
-	pthread_cond_wait(&all_thread_completed, &thread_complete_lock);
-	pthread_mutex_unlock(&thread_complete_lock);
 
-	pthread_exit(NULL);
-	return prob->score;
-    
-}
 
 /* Computes the maximum normalized mutual information scores
  * and returns a mine_score structure.
@@ -472,6 +503,10 @@ char *check_parameter(mine_parameter *param)
 	
 	return NULL;
 }
+
+/*
+ This function get mic,mev,mas,mcn from mine_score
+ */
 void get_result_score(mine_score *score,mine_result_score* result)
 {
 	int i, j,b;
@@ -508,93 +543,8 @@ void get_result_score(mine_score *score,mine_result_score* result)
 	result->mcn=log(b_max) / log(2.0);
     
 }
-/* Returns the Maximal Information Coefficient (MIC). */
-double mic(mine_score *score)
-{
-	int i, j;
-	double score_max;
-	
-	score_max = 0.0;
-	
-	if (score != NULL)
-    {
-		for (i=0; i<score->m; i++)
-			for (j=0; j<score->p[i]; j++)
-				if (score->I[i][j] > score_max)
-					score_max = score->I[i][j];
-    }
-	
-	return score_max;
-}
 
-/* Returns the Maximum Asymmetry Score (MAS). */
-double mas(mine_score *score)
-{
-	int i, j;
-	double score_max, s;
-	
-	score_max = 0.0;
-	
-	if (score != NULL)
-    {
-		for (i=0; i<score->m; i++)
-			for (j=0; j<score->p[i]; j++)
-			{
-				s = fabs(score->I[i][j] - score->I[j][i]);
-				if (s > score_max)
-					score_max = s;
-			}
-    }
-	
-	return score_max;
-}
 
-/* Returns the Maximum Edge Value (MEV). */
-double mev(mine_score *score)
-{
-	int i, j;
-	double score_max;
-	
-	score_max = 0.0;
-	
-	if (score != NULL)
-    {
-		for (i=0; i<score->m; i++)
-			for (j=0; j<score->p[i]; j++)
-				if (((j==0) || (i==0)) && score->I[i][j] > score_max)
-					score_max = score->I[i][j];
-    }
-	
-	return score_max;
-}
-
-/* Returns the Minimum Cell Number (MCN). */
-double mcn(mine_score *score)
-{
-	int i, j, b, b_max;
-	double score_max;
-	
-	b_max = 4;
-	score_max = -1.0;
-	
-	if (score != NULL)
-    {
-		for (i=0; i<score->m; i++)
-			for (j=0; j<score->p[i]; j++)
-			{
-				b = (i+2) * (j+2);
-				if ((score->I[i][j] > score_max) ||
-					((score->I[i][j] == score_max) && (b < b_max)))
-				{
-					score_max = score->I[i][j];
-					b_max = b;
-				}
-				
-			}
-    }
-	
-	return log(b_max) / log(2.0);
-}
 
 /* This function frees the memory used by a mine_score and
  *  destroys the score structure.
@@ -652,6 +602,7 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
 	}else{
 		numThreads=1;
 	}
+    numThreads=numThreads;
     batch_thread_complete_count=numThreads;
 	pthreadinfos=(batchThreadparams *)malloc(sizeof(batchThreadparams)*numThreads);
 	threads=(pthread_t *)malloc(sizeof(pthread_t )*numThreads);
@@ -694,7 +645,10 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
 			if (t<pageSize)
 			{
 				pVarPairs[t].var1=i;
-				pVarPairs[t].var2=j;
+				if (styleType==MasterVariable)
+				{
+					pVarPairs[t].var2=masterOrBetweenVariableid;
+				}else pVarPairs[t].var2=j;
 				t++;
 			}
 			if (t==pageSize)
@@ -790,14 +744,13 @@ int mine_masterVariableAnalysis(mine_parameter *param,double **inData,int m,int 
     return createBatchComputeThread(param, inData, m, n, masterid, outArray, outLen, MasterVariable);
 }
 
-int mine_onePairs_analysis( mine_parameter *param, double *x,double *y,int n,mine_result_score *outArray )
+int mine_onePair_analysis( mine_parameter *param, double *x,double *y,int n,mine_result_score *outArray )
 {
-	int j;
 	mine_problem *prob=(mine_problem *)malloc(sizeof(mine_problem));
 	prob->x = x;
 	prob->y = y;
 	prob->n = n;
-	if (prob->n>1000)
+	if (prob->n>=100)
 	{
 		mine_problem_init(prob,param);
 		mine_compute_score_multithread(prob,param);

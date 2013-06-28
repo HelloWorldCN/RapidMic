@@ -1,4 +1,17 @@
 /*
+ Dr. Tang rewrite the core MIC implementation based on Davide Albanese
+ The following code support rapidly computing MIC.
+ We presented a new rapidly computing maximal information-based nonparametric exploration tool for 
+ statistical analysis of large-scale dataset.  By parallel processing of MIC algorithm, the algorithm 
+ can well analyze large-scale dataset and greatly reduce the coputing time.
+ 下面的代码由西南交通大学 Dr唐 改写
+ 本代码采用多线程的方式快速计算MIC 值
+ 
+ Southwest Jiaotong University
+ 
+ */
+
+/*
  This code is written by Davide Albanese <davide.albanese@gmail.com>.
  (C) 2012 Davide Albanese, (C) 2012 Fondazione Bruno Kessler.
  
@@ -16,16 +29,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- Dr. Tang rewrite the core MIC implementation based on Davide Albanese
- The following code support rapidly computing MIC
- 下面的代码由西南交通大学 Dr唐 改写
- 本代码采用多线程的方式快速计算MIC 值
- 
- Southwest Jiaotong University
- 
- 
- */
+
 
 
 #include <stdlib.h>
@@ -33,7 +37,7 @@
 #include <math.h>
 #include <float.h>
 #include "core.h"
-
+#include <string.h>
 #define MAX(a, b) ((a) > (b) ? (a):(b))
 #define MIN(a, b) ((a) < (b) ? (a):(b))
 

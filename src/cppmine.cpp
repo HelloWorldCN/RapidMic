@@ -1,19 +1,25 @@
-#include <IOSTREAM>
-#include <cstdlib>
-#include "mine.h"
+/*
+ Dr. Tang rewrite the core MIC implementation based on Davide Albanese
+ The following code support rapidly computing MIC.
+ We presented a new rapidly computing maximal information-based nonparametric exploration tool for
+ statistical analysis of large-scale dataset.  By parallel processing of MIC algorithm, the algorithm
+ can well analyze large-scale dataset and greatly reduce the coputing time.
+ 下面的代码由西南交通大学 Dr唐 改写
+ 本代码采用多线程的方式快速计算MIC 值
+ 
+ Southwest Jiaotong University
+ 
+ */
+#include <iostream>
 #include "cppmine.h"
-#include "../src/stringenc.h"
-#include "../src/arg_parser.h"
+#include "./stringenc.h"
+#include "./arg_parser.h"
 #include <fstream>
-#include <time.h>
+//#define _MATLAB
+
+
 #if defined(WIN32) || defined(_WIN32)
-#   include <windows.h>
-#else
-#   include <sys/time.h>
-#endif
-#if defined(WIN32) || defined(_WIN32)
-int
-	gettimeofday(struct timeval *tp, void *tzp)
+int gettimeofday(struct timeval *tp, void *tzp)
 {
 	time_t clock;
 	struct tm tm;
@@ -33,8 +39,6 @@ int
 }
 #endif
 
-
-
 namespace {
 	const char * const Program_name = "RapidMic";
 	const char * const program_name = "rapidMic";
@@ -51,7 +55,7 @@ namespace {
             "-l <label style>, --inputlabel=<label style>     if input csv file's first line is comlumn name and the first comlumn is row name, then <label style>=0 ,else if just only comlumn name <label style>=1, else if just only row name <label style>=2 ;\n"
 			"-a <alpha value>, --alpha=<alpha>     the exponent in B(n) = n^alpha (default: 0.6.) alpha must be in (0, 1.0]\n"
 			"-c <clumps value>, --clumps=<c>     determines how many more clumps there will be than columns in every partition. Default value is 15,c must be > 0;\n"
-			"-o <file>, --output=<file>     output filename (default: mine_out.csv);\n"
+			"-o <file>, --output=<file>     output filename (if not be set, will print result in screen);\n"
             "-L <label style>, --outputlabel=<label style>     output csv file adopt number index of row as vaiable label ,then <label style>=0，else adopt input file's row name, then <label style>=1;\n"
 			"-A <allPairs>, --allPairs     will cause MINE to compare all pairs of variables against each other; \n"
 			"-b <var index>, --pairsBetween=<var index>     will compare each of the first i variables to each of the rest of the variables. Variables are indexed from 0;input variable <var index> must be in (0, number of variables in file)\n"
@@ -156,52 +160,6 @@ MINE::~MINE()
 Computes the maximum normalized mutual information scores between
 the variables x and y of length n.
 */
-
-
-
-/* Returns the Maximal Information Coefficient (MIC). */
-double MINE::get_mic()
-{
-	if (m_Results==NULL&&m_AnalysisStyle!=OneParis)
-	{
-		return -1;
-	}
-	return m_Results->mic;
-}
-
-
-/* Returns the Maximum Asymmetry Score (MAS). */
-double MINE::get_mas()
-{
-	if (m_Results==NULL&&m_AnalysisStyle!=OneParis)
-	{
-		return -1;
-	}
-	return m_Results->mas;
-}
-
-
-/* Returns the Maximum Edge Value (MEV). */
-double MINE::get_mev()
-{
-	if (m_Results==NULL&&m_AnalysisStyle!=OneParis)
-	{
-		return -1;
-	}
-	return m_Results->mev;
-}
-
-
-/* Returns the Minimum Cell Number (MCN). */
-double MINE::get_mcn()
-{
-	if (m_Results==NULL&&m_AnalysisStyle!=OneParis)
-	{
-		return -1;
-	}
-	return m_Results->mcn;
-}
-
 int MINE::AllPairsAnalysis( double **inData,int m,int n )
 {
 	m_AnalysisStyle=AllParis;
@@ -224,7 +182,6 @@ int MINE::AllPairsAnalysis( double **inData,int m,int n )
 
 	}
 	return ret;
-	//cout <<m_Results[outlen-1].mic;
 
 }
 int MINE::TwoSetsAnalysis( double **inDataSet,int m,int n,int betweenid )
@@ -275,7 +232,7 @@ int MINE::MasterAnalysis( double **inData,int m,int n,int masterid )
 	return ret;
 }
 
-int MINE::OnePairsAnalysis( double *x, double *y,int n )
+int MINE::OnePairAnalysis( double *x, double *y,int n )
 {
 	m_AnalysisStyle=OneParis;
 	if (m_Results!=NULL)
@@ -284,7 +241,7 @@ int MINE::OnePairsAnalysis( double *x, double *y,int n )
 	}
 	int outlen=1;
 	m_Results=new mine_result_score[outlen];
-	int ret=mine_onePairs_analysis(&param,x,y,n,m_Results);
+	int ret=mine_onePair_analysis(&param,x,y,n,m_Results);
 	if (ret)
 	{
 		m_ResultsArrayLen=outlen;
@@ -302,7 +259,7 @@ int MINE::run( int argc, char **argv )
 {
 	if (!parserArgs(argc,argv)) return 0;
     //read input data file;
-    cout << "begin reading input file;"<<endl;
+    cout << "reading input file..."<<endl;
     switch (m_inputLabel) {
         case 0:
             if(!readCSV(true, true)) return 0;
@@ -316,7 +273,7 @@ int MINE::run( int argc, char **argv )
         default:
             break;
     }
-    cout << "begin calculating......."<<endl;
+    cout << "calculating..."<<endl;
     struct  timeval start;
     struct  timeval end;
     
@@ -344,7 +301,7 @@ int MINE::run( int argc, char **argv )
 	case OneParis:
 		if (m_onepair1<m_inputDataRowNum&&m_onepair1>=0&&m_onepair2>=0&&m_onepair2<m_inputDataRowNum)
 		{
-			ret= OnePairsAnalysis(m_inputDataMatrix[m_onepair1],m_inputDataMatrix[m_onepair2],m_inputDataColNum);
+			ret= OnePairAnalysis(m_inputDataMatrix[m_onepair1],m_inputDataMatrix[m_onepair2],m_inputDataColNum);
 		}else { cout<<"input variable <var index> must be in [0, number of variables in file)"<<endl;return 0;}
 	default:
 		break;
@@ -353,14 +310,17 @@ int MINE::run( int argc, char **argv )
         cout << "completed calculation;"<<endl;
         gettimeofday(&end,NULL);
         diff = 1000000 * (end.tv_sec-start.tv_sec)+ end.tv_usec-start.tv_usec;
-        cout <<"total calculating time:"<<diff/(1000*1000) <<"(s)"<<endl;
-        return exportResult();
+        cout <<"total calculating time:"<<diff/(1000) <<"(ms)"<<endl;
+        if (m_outputFileName.empty()) {
+            printResult();
+            return 1;
+        }else  return exportResult();
     }else return 0;
 }
 
 bool MINE::readCSV(bool rowlabel,bool collabel)
 {
-	vector<vector<double>> inputdata;
+	vector<vector<double> > inputdata;
 	releaseInputMatrix();
     m_inputDataRowNum=m_inputDataColNum=0;
     m_varColNames.clear();
@@ -477,7 +437,7 @@ bool MINE::parserArgs( int argc, char **argv )
 			param.alpha=str2float(stralpha);
 			break;				
 		case 'b': 
-			m_AnalysisStyle=TwoSets;			
+			m_AnalysisStyle=TwoSets;
 			m_betweenId=str2int(stralpha);
 			break;
 		case 'c':
@@ -490,6 +450,9 @@ bool MINE::parserArgs( int argc, char **argv )
 		case 'm': 
 			m_AnalysisStyle=MasterVariable;	
 			m_masterId=str2int(stralpha);
+#ifdef _MATLAB
+			m_masterId--;
+#endif
 			break;
 		case 'A': m_AnalysisStyle=AllParis;	 break;
         case 'l':
@@ -505,6 +468,10 @@ bool MINE::parserArgs( int argc, char **argv )
 				m_AnalysisStyle=OneParis;
 				m_onepair1=str2int(strsplit[0]);
 				m_onepair2=str2int(strsplit[1]);
+#ifdef _MATLAB
+				m_onepair1--;
+				m_onepair2--;
+#endif
 			}
 			break;
 		default : internal_error( "uncaught option" );return false; break;
@@ -552,7 +519,7 @@ void MINE::printResult(){
 
 bool MINE::exportResult()
 {
-    cout << "begin writing result file;"<<endl;
+    cout << "writing result..."<<endl;
     if (m_ResultsArrayLen>0) {
         if (m_varRowNames.size()>0&&m_outputLabel==1) {
             ofstream outputfile(m_outputFileName.c_str());
@@ -598,14 +565,22 @@ bool MINE::exportResult()
                 outputfile<<"var1,var2,mic,mev,mcn,mas"<<endl;
                 switch (m_AnalysisStyle) {
                     case OneParis:
-                        outputfile<<m_onepair1<<","<<m_onepair2<<"," <<m_Results[0].mic<<","<<m_Results[0].mev<<","<<m_Results[0].mcn<<","<<m_Results[0].mas<<endl;
+#ifdef _MATLAB
+						outputfile<<(m_onepair1+1)<<","<<(m_onepair2+1)<<"," <<m_Results[0].mic<<","<<m_Results[0].mev<<","<<m_Results[0].mcn<<","<<m_Results[0].mas<<endl;
+#else
+						outputfile<<m_onepair1<<","<<m_onepair2<<"," <<m_Results[0].mic<<","<<m_Results[0].mev<<","<<m_Results[0].mcn<<","<<m_Results[0].mas<<endl;
+#endif
                         break;
                     case AllParis:
                         for (int i=0; i<m_inputDataRowNum; i++) {
                             for (int j=i+1; j<m_inputDataRowNum; j++) {
                                 int id=i*(m_inputDataRowNum-1)-i*(i-1)/2+j-i-1;
-                                outputfile<<i<<","<<j<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
-                            }
+								#ifdef _MATLAB
+                                outputfile<<i+1<<","<<j+1<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
+								#else
+								outputfile<<i<<","<<j<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
+								#endif
+							}
                         }
                         break;
                     case MasterVariable:
@@ -613,16 +588,26 @@ bool MINE::exportResult()
                             if (i==m_masterId) {
                                 continue;
                             }else{
-                                outputfile<<m_masterId<<","<<i<<"," <<m_Results[i].mic<<","<<m_Results[i].mev<<","<<m_Results[i].mcn<<","<<m_Results[i].mas<<endl;
-                            }
+								#ifdef _MATLAB
+                                outputfile<<m_masterId+1<<","<<i+1<<"," <<m_Results[i].mic<<","<<m_Results[i].mev<<","<<m_Results[i].mcn<<","<<m_Results[i].mas<<endl;
+#else
+								outputfile<<m_masterId<<","<<i<<"," <<m_Results[i].mic<<","<<m_Results[i].mev<<","<<m_Results[i].mcn<<","<<m_Results[i].mas<<endl;
+
+#endif
+							}
                         }
                         break;
                     case TwoSets:
                         for (int i=0; i<m_betweenId; i++) {
                             for (int j=m_betweenId; j<m_inputDataRowNum; j++) {
                                 int id=i*m_betweenId+j-m_betweenId;
-                                outputfile<<i<<","<<j<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
-                            }
+								#ifdef _MATLAB
+                                outputfile<<i+1<<","<<j+1<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
+#else
+								outputfile<<i<<","<<j<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
+
+#endif
+							}
                         }
                     default:
                         break;

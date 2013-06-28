@@ -5,6 +5,17 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#if defined(WIN32) || defined(_WIN32)
+#   include <windows.h>
+#include <time.h>
+#else
+#   include <sys/time.h>
+#endif
+#if defined(WIN32) || defined(_WIN32)
+int gettimeofday(struct timeval *tp, void *tzp);
+
+#endif
+
 
 class MINE {
     
@@ -34,23 +45,11 @@ public:
     ~MINE();
     
     
-    
-    /* Returns the Maximal Information Coefficient (MIC). */
-    double get_mic();
-    
-    /* Returns the Maximum Asymmetry Score (MAS). */
-    double get_mas();
-    
-    /* Returns the Maximum Edge Value (MEV). */
-    double get_mev();
-    
-    /* Returns the Minimum Cell Number (MCN). */
-    double get_mcn();
     /*
      Computes the maximum normalized mutual information scores between
      the variables x and y of length n.
      */
-	int OnePairsAnalysis(double *x, double *y,int n);
+	int OnePairAnalysis(double *x, double *y,int n);
 	int AllPairsAnalysis(double **inData,int m,int n);
 	int TwoSetsAnalysis(double **inDataSet,int m,int n,int betweenid);
 	int MasterAnalysis(double **inData,int m,int n,int masterid );
