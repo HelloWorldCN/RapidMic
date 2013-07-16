@@ -355,10 +355,6 @@ int GetClumpsPartition(double *Dx, int n, int *Qm)
 	int i, j, s, c, flag,cstart;
 	int preQ;
 	//int *Qm;
-	/*
-     Qm = (int *) malloc (n * sizeof(int));
-     for(i=0; i<n; i++)
-     Qm[i] = Qm[i];*/
 	
 	i = 0;
 	c = 0;
@@ -427,48 +423,7 @@ int GetClumpsPartition(double *Dx, int n, int *Qm)
         
 	}
 	
-	/*
-     i = 0;
-     c = -1;
-     while (i < n)//排序后数据序列中相同值的数中至少有一个如果没有划分到一个格子中，则相同的数重新划分到一个跟现有所有格子不同的新格子中
-     {
-     s = 1;
-     flag = 0;
-     for (j=i+1; j<n; j++)
-     if (Dx[i] == Dx[j])
-     {
-     s++;
-     if (Qm[i] != Qm[j])
-     flag = 1;
-     }
-     else
-     break;
-     
-     if ((s > 1) && (flag == 1))
-     {
-     for (j=0; j<s; j++)
-     Qm[i+j] = c;
-     c--;
-     }
-     
-     i += s;
-     }
-     //PrintArrayd(Dx,n);
-     //PrintArrayi(Qm,n);
-     //PrintArrayi(Qm_tilde,n);
-     i = 0;
-     Pm[0] = i;
-     //重新给序列分配 格子的编号 ，从0开始
-     for (j=1; j<n; j++)
-     {
-     if (Qm[j] != Qm[j-1])
-     i++;
-     Pm[j] = i;
-     }
-     PrintArrayd(Dx,n);
-     PrintArrayi(Qm,n);*/
-	//free(Qm);
-	//return i+1;
+	
 	return c+1;
 }
 
