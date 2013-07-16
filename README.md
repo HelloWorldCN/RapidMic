@@ -42,7 +42,7 @@ RapidMic is available at https://github.com/HelloWorldCN/RapidMic
 
 Example
 =======
-First download datasets from http://www.exploredata.net/Downloads
+First download datasets from https://github.com/HelloWorldCN/RapidMic/tree/master/data
 
 1)Ex1: Compute one pair(1 vs. 2) variables
 
@@ -114,7 +114,7 @@ RapidMic是《scicene》上提出的MIC（最大信息系数）的快速并行�
 在实现过程中对计算过程进行了大量的并行优化，因此软件能够快速的进行大量的数据的分析计算任务，不会像MINE原始作者提供
 的JAVA实现软件一样在稍微大一点的数据集进行所有序列都进行比对崩溃并且速度慢的问题。
 
-RapidMic is available at https://github.com/HelloWorldCN/RapidMic
+RapidMic is available at https://github.com/HelloWorldCN/RapidMic/tree/master/data
 
 
 
