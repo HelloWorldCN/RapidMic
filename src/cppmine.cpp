@@ -352,7 +352,7 @@ bool MINE::readCSV(bool rowlabel,bool collabel)
 					if (i==0&&rowlabel) {
 						m_varRowNames.push_back(strv[i]);
 					}
-					if (i!=0) {
+					if (i!=0||(i==0&&!rowlabel)) {
 						if (strv[i].empty()) p->push_back(0);
 						else{
 							double v=str2float(strv[i]);
@@ -507,7 +507,7 @@ void MINE::printResult(){
             case TwoSets:
                 for (int i=0; i<m_betweenId; i++) {
                     for (int j=m_betweenId; j<m_inputDataRowNum; j++) {
-                        int id=i*m_betweenId+j-m_betweenId;
+                        int id=i*(m_inputDataRowNum-m_betweenId)+j-m_betweenId;
                         std::cout<<i<<","<<j<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
                     }
                 }
@@ -549,7 +549,7 @@ bool MINE::exportResult()
                     case TwoSets:
                         for (int i=0; i<m_betweenId; i++) {
                             for (int j=m_betweenId; j<m_inputDataRowNum; j++) {
-                                int id=i*m_betweenId+j-m_betweenId;
+                                int id=i*(m_inputDataRowNum-m_betweenId)+j-m_betweenId;
                                 outputfile<<m_varRowNames[i]<<","<<m_varRowNames[j]<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
                             }
                         }
@@ -600,7 +600,7 @@ bool MINE::exportResult()
                     case TwoSets:
                         for (int i=0; i<m_betweenId; i++) {
                             for (int j=m_betweenId; j<m_inputDataRowNum; j++) {
-                                int id=i*m_betweenId+j-m_betweenId;
+                                int id=i*(m_inputDataRowNum-m_betweenId)+j-m_betweenId;
 								#ifdef _MATLAB
                                 outputfile<<i+1<<","<<j+1<<"," <<m_Results[id].mic<<","<<m_Results[id].mev<<","<<m_Results[id].mcn<<","<<m_Results[id].mas<<endl;
 #else

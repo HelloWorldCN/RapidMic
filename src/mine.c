@@ -57,7 +57,7 @@ pthread_mutex_t batch_thread_complete_lock= PTHREAD_MUTEX_INITIALIZER;
 //pthread_mutex_t batch_res_lock= PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t batch_all_thread_completed=PTHREAD_COND_INITIALIZER;
 unsigned batch_thread_complete_count=0;
-int num_threads=0;
+
 
 int getOptimizedThreadNum(int dataNum,int flag){
     //for single partion
@@ -349,23 +349,10 @@ void *batchComputeScoreThread(void *pparam)
 	score.I = (double **) malloc (score.m * sizeof(double *));
 	prob.Gy=pthdparainf->Gy;
 	for (i=0;i<pthdparainf->parisLength;i++)
-	{		
-        switch (pthdparainf->styleType) {
-            case AllParis:
-                prob.x=pthdparainf->inData[pthdparainf->paris[i].var1];
-                prob.y=pthdparainf->inData[pthdparainf->paris[i].var2];
-                break;
-            case TwoSets:
-                prob.x=pthdparainf->inData[pthdparainf->paris[i].var1];
-                prob.y=pthdparainf->inData[pthdparainf->paris[i].var2];
-                break;
-            case MasterVariable:
-                prob.x=pthdparainf->inData[pthdparainf->paris[i].var1];
-                prob.y=pthdparainf->inData[pthdparainf->paris[i].var2];
-                break;
-            default:
-                break;
-        }
+	{
+        prob.x=pthdparainf->inData[pthdparainf->paris[i].var1];
+        prob.y=pthdparainf->inData[pthdparainf->paris[i].var2];
+        
 		
 		/* sort and argsort of x and y */
 		
@@ -605,13 +592,18 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
 			Gy[gy-2] = gy;
 		}
 	}
-	if (m>10)
-	{
-		numThreads=20;
-	}else{
-		numThreads=1;
-	}
-    numThreads=numThreads;
+	if (outLen>10000){
+        numThreads=50;
+	}else if (outLen>5000){
+		numThreads=25;
+	}else if(outLen>2500){
+        numThreads=10;
+    }else if (outLen>1000){
+        numThreads=5;
+    }else if (outLen>100){
+        numThreads=2;
+    }else numThreads=1;
+    
     batch_thread_complete_count=numThreads;
 	pthreadinfos=(batchThreadparams *)malloc(sizeof(batchThreadparams)*numThreads);
 	threads=(pthread_t *)malloc(sizeof(pthread_t )*numThreads);
@@ -673,7 +665,6 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
                     case TwoSets:
                         pthreadinfos[k].styleType=TwoSets;                        
                         pthreadinfos[k].inData=inDataSet;
-                        pthreadinfos[k].n=n;
 						if (k<(numThreads-1))
 						{
 							pthreadinfos[k].outArray=&outArray[k*pageSize];
@@ -739,8 +730,6 @@ int createBatchComputeThread(mine_parameter *param,double **inDataSet,int m,int 
 int mine_allPairs_analysis(mine_parameter *param, double **inData,int m,int n,mine_result_score *outArray,int outLen )
 {
 	return createBatchComputeThread(param, inData, m, n, 0, outArray, outLen, AllParis);
-    
-	
 }
 
 //
@@ -748,6 +737,7 @@ int mine_twoSetsAnalysis(mine_parameter *param,double **inDataSet,int m,int n,in
 {
     return createBatchComputeThread(param, inDataSet, m, n,betweenid,  outArray,  outLen,TwoSets);
 }
+
 int mine_masterVariableAnalysis(mine_parameter *param,double **inData,int m,int n,int masterid,mine_result_score *outArray,int outLen )
 {
     return createBatchComputeThread(param, inData, m, n, masterid, outArray, outLen, MasterVariable);
@@ -759,7 +749,7 @@ int mine_onePair_analysis( mine_parameter *param, double *x,double *y,int n,mine
 	prob->x = x;
 	prob->y = y;
 	prob->n = n;
-	if (prob->n>=100)
+	if (prob->n>=100)//Avoid expensive multi threads calls.
 	{
 		mine_problem_init(prob,param);
 		mine_compute_score_mt(prob,param);
