@@ -73,7 +73,7 @@ extern "C" {
     }varPairs;
     
     typedef enum _ANALYSISSTYLES {
-        OneParis, AllParis, TwoSets, MasterVariable
+        OneParis=1, AllParis=2, TwoSets=3, MasterVariable=4
     }ANALYSISSTYLES;
     
     typedef struct _batchThreadparams

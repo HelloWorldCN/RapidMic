@@ -64,13 +64,13 @@ namespace {
 			);
 
 		std::printf( "\nReport bugs to tdm_2010#swjtu.edu.cn(replace # with @)\n"
-			"Home page: http://www.swjtu.edu.cn\n" );
+			"Home page: https://github.com/HelloWorldCN/RapidMic\n" );
 	}
 
 
 	void show_version()
 	{
-		std::printf( "%s %s\n", Program_name, "SWJTU" );
+		std::printf( "%s %s provided by %s\n", Program_name, "0.1b","Dr Tang" );
 	}
 
 
@@ -259,7 +259,7 @@ int MINE::run( int argc, char **argv )
 {
 	if (!parserArgs(argc,argv)) return 0;
     //read input data file;
-    cout << "reading input file..."<<endl;
+    
     switch (m_inputLabel) {
         case 0:
             if(!readCSV(true, true)) return 0;
@@ -273,7 +273,7 @@ int MINE::run( int argc, char **argv )
         default:
             break;
     }
-    cout << "calculating..."<<endl;
+    
     struct  timeval start;
     struct  timeval end;
     
@@ -281,26 +281,30 @@ int MINE::run( int argc, char **argv )
     gettimeofday(&start,NULL);
    
    
-    int ret;
+    int ret=0;
 	switch (m_AnalysisStyle) {
 	case AllParis:
+        cout << "calculating..."<<endl;
 		ret= AllPairsAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum);
 		break;
 	case TwoSets:
 		if (m_betweenId>0&&m_betweenId<m_inputDataRowNum)
 		{
+            cout << "calculating..."<<endl;
 			ret= TwoSetsAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum,m_betweenId);
 		}else{ cout<<"input variable <var index> must be in (0, number of variables in file)"<<endl;return 0;}
 		break;
 	case MasterVariable:
 		if (m_masterId>=0&&m_masterId<m_inputDataRowNum)
 		{
+            cout << "calculating..."<<endl;
 			ret= MasterAnalysis(m_inputDataMatrix,m_inputDataRowNum,m_inputDataColNum,m_masterId);
 		}else { cout<<"input variable <var index> must be in [0, number of variables in file)"<<endl;return 0;}
 		break;
 	case OneParis:
 		if (m_onepair1<m_inputDataRowNum&&m_onepair1>=0&&m_onepair2>=0&&m_onepair2<m_inputDataRowNum)
 		{
+            cout << "calculating..."<<endl;
 			ret= OnePairAnalysis(m_inputDataMatrix[m_onepair1],m_inputDataMatrix[m_onepair2],m_inputDataColNum);
 		}else { cout<<"input variable <var index> must be in [0, number of variables in file)"<<endl;return 0;}
 	default:
@@ -334,6 +338,7 @@ bool MINE::readCSV(bool rowlabel,bool collabel)
 		vector<double> *p=NULL;
 		
 		bool isFirstLine=true;
+        cout << "reading input file..."<<endl;
 		while(getline(in, line)  && in.good() )
 		{
 			vector<string> strv=split(line,",");
@@ -419,7 +424,12 @@ bool MINE::parserArgs( int argc, char **argv )
 
 	const Arg_parser parser( argc, argv, options );
 	if( parser.error().size() )				// bad option
-	{ show_error( parser.error().c_str(), 0, true ); return false; }
+	{
+        show_error( parser.error().c_str(), 0, true );
+        return false;
+    }
+    if(parser.arguments()==0) {show_help(); return false;}
+    
 
 	for( int argind = 0; argind < parser.arguments(); ++argind )
 	{
