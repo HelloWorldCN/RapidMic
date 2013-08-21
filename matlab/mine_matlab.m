@@ -32,7 +32,7 @@
 % 1	7	0.316317000000000	0.316317000000000	2.58496000000000	0.0231334000000000
 % 1	8	0.285196000000000	0.285196000000000	2.58496000000000	0.0409440000000000
 
-%Notice：In Matlab environment, the row and column arguments are one based, so that row=1 and col=1 specify the first value in the file.
+%Notice：In Matlab environment, the row and column arguments are one based, so that row=1 and col=1 specify the first value in the file. The input data file and the compiled executable RapidMic need to be in the same directory for this matlab wrapper to work properly. 
 
 
 %Demo, given the file Spellman.csv that contains the comma-separated values
@@ -50,51 +50,6 @@
 % result=mine_matlab('Spellman.csv',0.6,15,0,'A');
 
 
-% % 帮助文件
-% 输入参数
-% inputcsvfile     输入的CSV格式的数据文件
-% alpha            the exponent in B(n) = n^alpha (default: 0.6.) alpha must be in (0, 1.0];
-% clumps           determines how many more clumps there will be than columns in every partition;
-% colRowName       输入数据文件是否包含行名或者列名，=0则表示第一行和第一列分别为行列名，=1则表示只有列名，=2表示只有行名 ;
-% analysisStyles   进行那种类型的分析任务，
-%                         ='A'表示所有数据之间两两比对
-%                         ='b'前i数据和剩余数据之间两两比对，附带参数取值范围为[1, 数据个数)
-%                         ='m'指定一个数据和其它数据之间进行两两比对，附带参数取值范围为 [1, 数据个数];
-%                         ='p'指定两个数据之间进行比对,附带参数取值范围为 [1, 数据个数];
-% 
-% params           每种分析任务携带的参数 
-
-% 输出参数
-% result             运行成功则返回一个n*6的矩阵
-% 输出矩阵的格式如下：
-%       var1,var2,mic,mev,mcn,mas
-% 		1,2,0.1,0.2,0.4,0.5
-% 		....
-%             
-%             下面为一个输出结果的示例
-% 1	2	0.389423000000000	0.389423000000000	2.58496000000000	0.0793332000000000
-% 1	3	0.296060000000000	0.296060000000000	2.58496000000000	0.0519203000000000
-% 1	4	0.307326000000000	0.307326000000000	2.58496000000000	0.0731126000000000
-% 1	5	0.258777000000000	0.258777000000000	2.58496000000000	0.0427501000000000
-% 1	6	0.588635000000000	0.588635000000000	2.58496000000000	0.0427626000000000
-% 1	7	0.316317000000000	0.316317000000000	2.58496000000000	0.0231334000000000
-% 1	8	0.285196000000000	0.285196000000000	2.58496000000000	0.0409440000000000
-
-%注意：在matlab环境下，所有的行列标示均从1开始计数
-
-
-
-% 示例1：
-% result=mine_matlab('Spellman.csv',0.6,15,0,'m',1);
-
-% 示例2：
-% result=mine_matlab('Spellman.csv',0.6,15,0,'p',[3 4]);
-
-% 示例3：
-% result=mine_matlab('Spellman.csv',0.6,15,0,'b',10);
-
-% 示例4：
-% result=mine_matlab('Spellman.csv',0.6,15,0,'A');
 
 
 function [result] = mine_matlab(inputcsvfile,alpha,clumps,colRowName,analysisStyles,params)
