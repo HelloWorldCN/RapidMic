@@ -75,6 +75,7 @@ template <class Type> string tostring(Type a) {
   string s;
   ss << a;
   ss >> s;
+  return s;
 }
 
 /**

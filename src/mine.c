@@ -471,10 +471,10 @@ mine_score *mine_compute_score(mine_problem *prob, mine_parameter *param) {
  */
 char *check_parameter(mine_parameter *param) {
   if ((param->alpha <= 0.0) || (param->alpha > 1.0))
-    return "alpha must be in (0, 1.0]";
+    return (char*)"alpha must be in (0, 1.0]";
 
   if (param->c <= 0.0)
-    return "c must be > 0.0";
+    return (char*)"c must be > 0.0";
 
   return NULL;
 }
