@@ -49,58 +49,57 @@
     (without whitespace), or '--<long_option>=<argument>'.
 */
 
-class Arg_parser
-  {
+class Arg_parser {
 public:
   enum Has_arg { no, yes, maybe };
 
-  struct Option
-    {
-    int code;			// Short option letter or code ( code != 0 )
-    const char * name;		// Long option name (maybe null)
+  struct Option {
+    int code;         // Short option letter or code ( code != 0 )
+    const char *name; // Long option name (maybe null)
     Has_arg has_arg;
-    };
+  };
 
 private:
-  struct Record
-    {
+  struct Record {
     int code;
     std::string argument;
-    explicit Record( const int c = 0 ) : code( c ) {}
-    };
+    explicit Record(const int c = 0) : code(c) {}
+  };
 
   std::string error_;
-  std::vector< Record > data;
+  std::vector<Record> data;
 
-  bool parse_long_option( const char * const opt, const char * const arg,
-                          const Option options[], int & argind );
-  bool parse_short_option( const char * const opt, const char * const arg,
-                           const Option options[], int & argind );
+  bool parse_long_option(const char *const opt, const char *const arg,
+                         const Option options[], int &argind);
+  bool parse_short_option(const char *const opt, const char *const arg,
+                          const Option options[], int &argind);
 
 public:
-  Arg_parser( const int argc, const char * const argv[],
-              const Option options[], const bool in_order = false );
+  Arg_parser(const int argc, const char *const argv[], const Option options[],
+             const bool in_order = false);
 
-      // Restricted constructor. Parses a single token and argument (if any)
-  Arg_parser( const char * const opt, const char * const arg,
-              const Option options[] );
+  // Restricted constructor. Parses a single token and argument (if any)
+  Arg_parser(const char *const opt, const char *const arg,
+             const Option options[]);
 
-  const std::string & error() const { return error_; }
+  const std::string &error() const { return error_; }
 
-      // The number of arguments parsed (may be different from argc)
+  // The number of arguments parsed (may be different from argc)
   int arguments() const { return data.size(); }
 
-      // If code( i ) is 0, argument( i ) is a non-option.
-      // Else argument( i ) is the option's argument (or empty).
-  int code( const int i ) const
-    {
-    if( i >= 0 && i < arguments() ) return data[i].code;
-    else return 0;
-    }
+  // If code( i ) is 0, argument( i ) is a non-option.
+  // Else argument( i ) is the option's argument (or empty).
+  int code(const int i) const {
+    if (i >= 0 && i < arguments())
+      return data[i].code;
+    else
+      return 0;
+  }
 
-  const std::string & argument( const int i ) const
-    {
-    if( i >= 0 && i < arguments() ) return data[i].argument;
-    else return error_;
-    }
-  };
+  const std::string &argument(const int i) const {
+    if (i >= 0 && i < arguments())
+      return data[i].argument;
+    else
+      return error_;
+  }
+};
