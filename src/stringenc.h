@@ -12,13 +12,12 @@
  *         strtolower,        // all to lower case
  *         //strtocapital,        // capital first character
  *
- */ 
-#include <string>
-#include <cstring>
-#include <vector>
-#include <sstream>
+ */
 #include <algorithm>
-
+#include <cstring>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -26,11 +25,12 @@ using namespace std;
  * @brief split a string by delim
  *
  * @param str string to be splited
- * @param c delimiter, const char*, just like " .,/", white space, dot, comma, splash
+ * @param c delimiter, const char*, just like " .,/", white space, dot, comma,
+ * splash
  *
  * @return a string vector saved all the splited world
  */
-vector<string> split(string& str,const char* c);
+vector<string> split(string &str, const char *c);
 
 /**
  * @brief convert a integer into string through stringstream
@@ -47,12 +47,11 @@ string float2str(double f);
  * @brief convert something to string form through stringstream
  *
  * @tparam Type Type can be int,float,double
- * @param a 
+ * @param a
  *
- * @return the string form of param a  
+ * @return the string form of param a
  */
-template<class Type>
-string tostring(Type a);
+template <class Type> string tostring(Type a);
 
 /**
  * @brief convert string to int by atoi
@@ -61,9 +60,8 @@ string tostring(Type a);
  *
  * @return the integer result
  */
-int str2int(string& s);
-double str2float(string& s);
-
+int str2int(string &s);
+double str2float(string &s);
 
 /**
  * @brief do string convert through stringstream from FromType to ToType
@@ -74,20 +72,21 @@ double str2float(string& s);
  *
  * @return the target form of param t
  */
-template<class ToType,class FromType>
-ToType strconvert(FromType t);
+template <class ToType, class FromType> ToType strconvert(FromType t);
 
 /**
- * @brief convert string to upper case throught transform method, also can use transform method directly
+ * @brief convert string to upper case throught transform method, also can use
+ * transform method directly
  *
  * @param s
  *
  * @return the upper case result saved still in s
  */
-string& strtoupper(string& s);
+string &strtoupper(string &s);
 
 /**
- * @brief convert string to upper case through toupper, which transform a char into upper case 
+ * @brief convert string to upper case through toupper, which transform a char
+ * into upper case
  *
  * @param s
  *
@@ -96,20 +95,21 @@ string& strtoupper(string& s);
 string strtoupper(string s);
 
 /**
- * @brief convert string to lower case throught transform method, also can use transform method directly
+ * @brief convert string to lower case throught transform method, also can use
+ * transform method directly
  *
  * @param s
  *
  * @return the lower case result saved still in s
  */
-string& strtolower(string& s);
+string &strtolower(string &s);
 
 /**
- * @brief convert string to lower case through tolower, which transform a char into lower case 
+ * @brief convert string to lower case through tolower, which transform a char
+ * into lower case
  *
  * @param s
  *
  * @return the lower case result string
  */
 string strtolower(string s);
-
